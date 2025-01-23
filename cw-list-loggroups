@@ -1,0 +1,23 @@
+#!/bin/bash
+
+log_groups=$(aws logs describe-log-groups --query 'logGroups[*].{LogGroupName:logGroupName, StoredBytes:storedBytes}' --output json)
+
+convert_size() {
+  local bytes=$1
+  if (( bytes < 1024 )); then
+    echo "${bytes} bytes"
+  elif (( bytes < 1048576 )); then
+    echo "$(( bytes / 1024 )) KB"
+  elif (( bytes < 1073741824 )); then
+    echo "$(( bytes / 1048576 )) MB"
+  else
+    echo "$(( bytes / 1073741824 )) GB"
+  fi
+}
+
+echo "$log_groups" | jq -c '.[]' | while read -r log_group; do
+  log_group_name=$(echo "$log_group" | jq -r '.LogGroupName')
+  log_size=$(echo "$log_group" | jq -r '.StoredBytes')
+  converted_size=$(convert_size "$log_size")
+  echo "$log_group_name, Size: $converted_size"
+done
