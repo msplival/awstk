@@ -18,6 +18,8 @@ convert_size() {
 echo "$log_groups" | jq -c '.[]' | while read -r log_group; do
   log_group_name=$(echo "$log_group" | jq -r '.LogGroupName')
   log_size=$(echo "$log_group" | jq -r '.StoredBytes')
+  echo "$log_size $log_group_name"
+done | sort -rn | while read -r log_size log_group_name; do
   converted_size=$(convert_size "$log_size")
-  echo "$log_group_name, Size: $converted_size"
+  echo "Log Group: $log_group_name, Size: $converted_size"
 done
