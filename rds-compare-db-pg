@@ -23,8 +23,10 @@ aws rds describe-db-cluster-parameters \
   --query "Parameters[].[ParameterName, ParameterValue]" \
   --output json > "$TMP_DIR/group2.json"
 
-jq -r '.[] | @tsv' "$TMP_DIR/group1.json" | sort > "$TMP_DIR/group1.tsv"
-jq -r '.[] | @tsv' "$TMP_DIR/group2.json" | sort > "$TMP_DIR/group2.tsv"
+jq -r '.[] | @tsv' "$TMP_DIR/group1.json" | sort -k1,1 > "$TMP_DIR/group1.tsv"
+jq -r '.[] | @tsv' "$TMP_DIR/group2.json" | sort -k1,1 > "$TMP_DIR/group2.tsv"
+
+echo -e "Parameter\t$GROUP1\t$GROUP2"
 
 join -t $'\t' -a 1 -a 2 -e "<none>" -o auto "$TMP_DIR/group1.tsv" "$TMP_DIR/group2.tsv" |
   awk -F $'\t' '$2 != $3 { printf "%-40s %-30s %-30s\n", $1, $2, $3 }' |
